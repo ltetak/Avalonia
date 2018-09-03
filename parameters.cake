@@ -53,6 +53,8 @@ public class Parameters
         ReleaseBranchPrefix = "refs/heads/release/";
         ReleaseConfiguration = "Release";
         MSBuildSolution = "./dirs.proj";
+        //TODO: add param for desktop only projects
+        MSBuildSolution = "./Avalonia.Desktop.sln";
 
         // PARAMETERS
         IsLocalBuild = buildSystem.IsLocalBuild;
@@ -61,12 +63,12 @@ public class Parameters
         IsRunningOnAppVeyor = buildSystem.AppVeyor.IsRunningOnAppVeyor;
         IsRunningOnAzure = buildSystem.IsRunningOnVSTS || buildSystem.IsRunningOnTFS || context.EnvironmentVariable("LOGNAME") == "vsts";
         
-        IsPullRequest = buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest;
+        //IsPullRequest = buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest;
         IsMainRepo = StringComparer.OrdinalIgnoreCase.Equals(MainRepo, context.EnvironmentVariable("BUILD_REPOSITORY_URI"));
         IsMasterBranch = StringComparer.OrdinalIgnoreCase.Equals(MasterBranch, context.EnvironmentVariable("BUILD_SOURCEBRANCHNAME"));
-        IsReleaseBranch = context.EnvironmentVariable("BUILD_SOURCEBRANCH").ToLower().StartsWith(ReleaseBranchPrefix.ToLower());
-        IsTagged = buildSystem.AppVeyor.Environment.Repository.Tag.IsTag 
-                && !string.IsNullOrWhiteSpace(buildSystem.AppVeyor.Environment.Repository.Tag.Name);
+        //IsReleaseBranch = context.EnvironmentVariable("BUILD_SOURCEBRANCH").ToLower().StartsWith(ReleaseBranchPrefix.ToLower());
+        //IsTagged = buildSystem.AppVeyor.Environment.Repository.Tag.IsTag 
+        //        && !string.IsNullOrWhiteSpace(buildSystem.AppVeyor.Environment.Repository.Tag.Name);
         IsReleasable = StringComparer.OrdinalIgnoreCase.Equals(ReleaseConfiguration, Configuration);
         IsMyGetRelease = !IsTagged && IsReleasable;
         IsNuGetRelease = IsMainRepo && IsReleasable && IsReleaseBranch;
