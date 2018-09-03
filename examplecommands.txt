@@ -1,0 +1,20 @@
+./build.ps1 -target Build --force-nuget-version=0.6.2.3
+./build.ps1 -target Create-NuGet-Packages-Impl --force-nuget-version=0.6.2.3
+
+
+./build.ps1 -target Build -Configuration Debug --force-nuget-version=0.6.2.3
+./build.ps1 -target Create-NuGet-Packages-Impl -Configuration Debug --force-nuget-version=0.6.2.3
+
+
+cmd
+
+rmdir /q /s "C:\Users\andrew\.nuget\packages\avalonia\0.6.2.3"
+rmdir /q /s "C:\Users\andrew\.nuget\packages\Avalonia.Direct2D1\0.6.2.3"
+rmdir /q /s "C:\Users\andrew\.nuget\packages\Avalonia.Skia\0.6.2.3"
+rmdir /q /s "C:\Users\andrew\.nuget\packages\Avalonia.Win32\0.6.2.3"
+rmdir /q /s "C:\Users\andrew\.nuget\packages\Avalonia.Win32.Interoperability\0.6.2.3"
+
+copy D:\Development\github\Avalonia\artifacts\nuget\Avalonia.0.6.2.3.nupkg D:\Development\Synergy\NuGet
+
+
+copy D:\Development\github\Avalonia\artifacts\nuget\*.nupkg D:\Development\Synergy\NuGet
