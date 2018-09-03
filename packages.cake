@@ -486,7 +486,8 @@ public class Packages
 
         if (parameters.IsRunningOnWindows) {
             NuspecNuGetSettings.Add(nuspecNuGetSettingInterop);
-            NuspecNuGetSettings.AddRange(nuspecNuGetSettingsMobile);
+            //TODO: add param for desktop only builds
+            //NuspecNuGetSettings.AddRange(nuspecNuGetSettingsMobile);
         }
 
         NuspecNuGetSettings.ForEach((nuspec) => SetNuGetNuspecCommonProperties(nuspec));
