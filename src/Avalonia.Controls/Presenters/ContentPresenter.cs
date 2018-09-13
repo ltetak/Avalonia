@@ -201,7 +201,8 @@ namespace Avalonia.Controls.Presenters
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
         {
             base.OnAttachedToVisualTree(e);
-            _dataTemplate = null;
+            // do not reset content presenter data template on attachedtovisualtree as this causes issues with reusing the presenter child
+            //_dataTemplate = null;
         }
 
         /// <summary>
