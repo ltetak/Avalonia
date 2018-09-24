@@ -365,7 +365,7 @@ namespace Avalonia.Controls.Presenters
             var panel = VirtualizingPanel;
             var generator = Owner.ItemContainerGenerator;
             var selector = Owner.MemberSelector;
-            var containers = generator.Containers.ToList();
+            var containers = generator.Containers.OrderBy(c => c.Index).ToList();
             var itemIndex = FirstIndex;
 
             foreach (var container in containers)
@@ -374,7 +374,7 @@ namespace Avalonia.Controls.Presenters
 
                 if (!object.Equals(container.Item, item))
                 {
-                    if (!generator.TryRecycle(itemIndex, itemIndex, item, selector))
+                    if (!generator.TryRecycle(container.Index, itemIndex, item, selector))
                     {
                         throw new NotImplementedException();
                     }
