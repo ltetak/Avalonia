@@ -1,3 +1,14 @@
 ./build.ps1 -target Build --force-nuget-version=0.6.2.1
-
 ./build.ps1 -target Create-NuGet-Packages-Impl --force-nuget-version=0.6.2.1
+
+
+./build.ps1 -target Build -Configuration Debug --force-nuget-version=0.6.2.2
+./build.ps1 -target Create-NuGet-Packages-Impl -Configuration Debug --force-nuget-version=0.6.2.2
+
+
+rmdir /q /s "C:\Users\andrew\.nuget\packages\avalonia\0.6.2.2"
+
+copy D:\Development\github\Avalonia\artifacts\nuget\Avalonia.0.6.2.2.nupkg D:\Development\Synergy\NuGet
+
+
+copy D:\Development\github\Avalonia\artifacts\nuget\*.nupkg D:\Development\Synergy\NuGet
