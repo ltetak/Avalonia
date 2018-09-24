@@ -11,6 +11,9 @@ using Avalonia.UnitTests;
 using Avalonia.VisualTree;
 using Xunit;
 using Avalonia.Collections;
+using System;
+using System.Collections.ObjectModel;
+using Avalonia.Data;
 
 namespace Avalonia.Controls.UnitTests
 {
@@ -169,6 +172,132 @@ namespace Avalonia.Controls.UnitTests
             Assert.Equal(new Size(20, 20), target.Scroll.Extent);
             Assert.Equal(new Size(100, 10), target.Scroll.Viewport);
         }
+
+
+        [Fact]
+        public void When_Added_Removed_AfterItems_Change_Should_Work1()
+        {
+            Type listBoxType = typeof(ListBox);
+            using (UnitTestApplication.Start(TestServices.StyledWindow))
+            {
+                ObservableCollection<string> items = new ObservableCollection<string>();
+
+                Func<int, bool, string> itemname = (ind, child) => $"o#{ind}#{(child ? ":c" : "")}";
+                Action create = () =>
+                {
+                    foreach (var i in Enumerable.Range(1, 7))
+                    {
+                        items.Add(itemname(i, false));
+                    }
+                };
+
+                Func<int, bool, int> indexOf = (ind, child) =>
+                {
+                    return items.IndexOf(itemname(ind, child));
+                };
+
+                create();
+
+                var wnd = new Window() { SizeToContent = SizeToContent.WidthAndHeight };
+
+                wnd.IsVisible = true;
+
+                ListBox target = Activator.CreateInstance(listBoxType) as ListBox;
+
+                wnd.Content = target;
+
+                var lm = wnd.LayoutManager;
+
+                target.Height = 80 + 30;
+                target.Width = 50;
+                target.DataContext = items;
+
+                target.ItemTemplate = new FuncDataTemplate<object>(c =>
+                {
+                    var tb = new TextBlock() { Height = 10, Width = 30 };
+                    tb.Bind(TextBlock.TextProperty, new Binding());
+                    return tb;
+                }, true);
+  
+                Panel panel;
+
+                lm.ExecuteInitialLayoutPass(wnd);
+
+                var itemsBinding = new Binding();
+                target.Bind(ItemsControl.ItemsProperty, itemsBinding);
+
+                lm.ExecuteLayoutPass();
+
+                panel = target.GetLogicalChildren().Cast<Control>().First().GetVisualParent<Panel>();
+
+                Func<string> itemsToString = () =>
+                {
+                    var tt = panel.Children.OfType<ListBoxItem>().Select(l => l.Content as string).ToArray();
+                    return string.Join(",", tt);
+                };
+
+                Action<int> addChild = ind =>
+                {
+                    int ai = indexOf(ind, false);
+
+                    items.Insert(ai + 1, itemname(ind, true));
+                };
+
+                Action<int> removeChild = ind =>
+                {
+                    int ai = indexOf(ind, true);
+
+                    items.RemoveAt(ai);
+                };
+
+                addChild(1);
+                lm.ExecuteLayoutPass();
+
+                addChild(2);
+                lm.ExecuteLayoutPass();
+
+                addChild(3);
+                lm.ExecuteLayoutPass();
+
+                removeChild(2);
+                lm.ExecuteLayoutPass();
+
+                ///RESET
+                items.Clear();
+                create();
+
+                addChild(1);
+                lm.ExecuteLayoutPass();
+
+                addChild(2);
+                lm.ExecuteLayoutPass();
+
+                addChild(3);
+                lm.ExecuteLayoutPass();
+
+                removeChild(2);
+                lm.ExecuteLayoutPass();
+
+                var sti = itemsToString();
+
+                var lbItems = panel.Children.OfType<ListBoxItem>().ToArray();
+
+                Assert.Equal("o#1#", lbItems[0].Content);
+                Assert.Equal("o#1#:c", lbItems[1].Content);
+                Assert.Equal("o#2#", lbItems[2].Content);
+                Assert.Equal("o#3#", lbItems[3].Content); //bug it's o#2#:c instead
+                Assert.Equal("o#3#:c", lbItems[4].Content);
+
+                int lbi = 0;
+                foreach (var lb in lbItems)
+                {
+                    Assert.Equal(items[lbi++], lb.Content);
+                }
+
+                //Assert.Equal("o#1#,o#1#:c,o#2#,o#3#,o#3#:c,o#4#,o#5#,o#6#", sti);
+            }
+        }
+
 
         private FuncControlTemplate ListBoxTemplate()
         {
