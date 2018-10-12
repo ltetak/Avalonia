@@ -22,14 +22,14 @@ namespace Avalonia.Controls.Primitives
     /// <remarks>
     /// <para>
     /// <see cref="SelectingItemsControl"/> provides a base class for <see cref="ItemsControl"/>s
-    /// that maintain a selection (single or multiple). By default only its 
+    /// that maintain a selection (single or multiple). By default only its
     /// <see cref="SelectedIndex"/> and <see cref="SelectedItem"/> properties are visible; the
-    /// current multiple selection <see cref="SelectedItems"/> together with the 
-    /// <see cref="SelectionMode"/> properties are protected, however a derived  class can expose 
+    /// current multiple selection <see cref="SelectedItems"/> together with the
+    /// <see cref="SelectionMode"/> properties are protected, however a derived  class can expose
     /// these if it wishes to support multiple selection.
     /// </para>
     /// <para>
-    /// <see cref="SelectingItemsControl"/> maintains a selection respecting the current 
+    /// <see cref="SelectingItemsControl"/> maintains a selection respecting the current
     /// <see cref="SelectionMode"/> but it does not react to user input; this must be handled in a
     /// derived class. It does, however, respond to <see cref="IsSelectedChangedEvent"/> events
     /// from items and updates the selection accordingly.
@@ -62,7 +62,7 @@ namespace Avalonia.Controls.Primitives
             AvaloniaProperty.RegisterDirect<SelectingItemsControl, object>(
                 nameof(SelectedItem),
                 o => o.SelectedItem,
-                (o, v) => o.SelectedItem = v, 
+                (o, v) => o.SelectedItem = v,
                 defaultBindingMode: BindingMode.TwoWay);
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Avalonia.Controls.Primitives
         /// </summary>
         public static readonly RoutedEvent<RoutedEventArgs> IsSelectedChangedEvent =
             RoutedEvent.Register<SelectingItemsControl, RoutedEventArgs>(
-                "IsSelectedChanged", 
+                "IsSelectedChanged",
                 RoutingStrategies.Bubble);
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Avalonia.Controls.Primitives
         /// </summary>
         public static readonly RoutedEvent<SelectionChangedEventArgs> SelectionChangedEvent =
             RoutedEvent.Register<SelectingItemsControl, SelectionChangedEventArgs>(
-                "SelectionChanged", 
+                "SelectionChanged",
                 RoutingStrategies.Bubble);
 
         private static readonly IList Empty = new object[0];
@@ -521,7 +521,7 @@ namespace Avalonia.Controls.Primitives
                     else if (multi && range)
                     {
                         SynchronizeItems(
-                            SelectedItems, 
+                            SelectedItems,
                             GetRange(Items, SelectedIndex, index));
                     }
                     else
@@ -583,7 +583,7 @@ namespace Avalonia.Controls.Primitives
         }
 
         /// <summary>
-        /// Updates the selection based on an event that may have originated in a container that 
+        /// Updates the selection based on an event that may have originated in a container that
         /// belongs to the control.
         /// </summary>
         /// <param name="eventSource">The control that raised the event.</param>
@@ -595,7 +595,7 @@ namespace Avalonia.Controls.Primitives
         /// false.
         /// </returns>
         protected bool UpdateSelectionFromEventSource(
-            IInteractive eventSource, 
+            IInteractive eventSource,
             bool select = true,
             bool rangeModifier = false,
             bool toggleModifier = false)
@@ -807,12 +807,10 @@ namespace Avalonia.Controls.Primitives
                             SelectedIndex = -1;
                         }
                     }
-                    else
+
+                    foreach (var item in e.OldItems)
                     {
-                        foreach (var item in e.OldItems)
-                        {
-                            MarkItemSelected(item, false);
-                        }
+                        MarkItemSelected(item, false);
                     }
 
                     removed = e.OldItems;
