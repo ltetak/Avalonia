@@ -23,6 +23,7 @@ namespace Avalonia.Rendering
         private readonly IVisual _root;
         private readonly IRenderRoot _renderRoot;
         private IRenderTarget _renderTarget;
+        private Rect _lastPaintBounds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmediateRenderer"/> class.
@@ -45,6 +46,8 @@ namespace Avalonia.Rendering
         /// <inheritdoc/>
         public void Paint(Rect rect)
         {
+            _lastPaintBounds = rect;
+
             if (_renderTarget == null)
             {
                 _renderTarget = ((IRenderRoot)_root).CreateRenderTarget();
@@ -115,16 +118,56 @@ namespace Avalonia.Rendering
             }
         }
 
+        private static Matrix? TransformToVisual(IVisual visual, IVisual root)
+        {
+            var result = Matrix.Identity;
+
+            while (visual != root)
+            {
+                if (visual.RenderTransform?.Value != null)
+                {
+                    var origin = visual.RenderTransformOrigin.ToPixels(visual.Bounds.Size);
+                    var offset = Matrix.CreateTranslation(origin);
+                    var renderTransform = (-offset) * visual.RenderTransform.Value * (offset);
+
+                    result *= renderTransform;
+                }
+
+                var topLeft = visual.Bounds.TopLeft;
+
+                if (topLeft != default)
+                {
+                    result *= Matrix.CreateTranslation(topLeft);
+                }
+
+                visual = visual.VisualParent;
+
+                if (visual == null)
+                {
+                    return null;
+                }
+            }
+
+            return result;
+        }
+
         /// <inheritdoc/>
         public void AddDirty(IVisual visual)
         {
             if (visual.Bounds != Rect.Empty)
             {
-                var m = visual.TransformToVisual(_root);
+                var m = TransformToVisual(visual, _root);
 
                 if (m.HasValue)
                 {
                     var bounds = new Rect(visual.Bounds.Size).TransformToAABB(m.Value);
+
+                    if (_lastPaintBounds != default)
+                    {
+                        _renderRoot?.Invalidate(_lastPaintBounds);
+                        _lastPaintBounds = default;
+                    }
+
                     _renderRoot?.Invalidate(bounds);
                 }
             }
@@ -191,7 +234,7 @@ namespace Avalonia.Rendering
             }
         }
 
-        static IEnumerable<IVisual> HitTest(
+        private static IEnumerable<IVisual> HitTest(
            IVisual visual,
            Point p,
            Func<IVisual, bool> filter)
