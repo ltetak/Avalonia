@@ -62,7 +62,7 @@ namespace Avalonia.Skia
             {
                 typeface = SKTypeface.FromFamilyName(familyKey, key.Weight, SKFontStyleWidth.Normal, key.Slant);
 
-                if (typeface.FamilyName != name)
+                if (typeface == null)
                 {
                     typeface = Default;
                 }
