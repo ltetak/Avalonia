@@ -3,6 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Views\ControlDetailsView.xaml" />
     <None Remove="Views\EventsView.xaml" />
   </ItemGroup>
   <ItemGroup>
