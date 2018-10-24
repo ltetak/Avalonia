@@ -103,8 +103,10 @@ namespace Avalonia.Collections
 
                     case NotifyCollectionChangedAction.Move:
                     case NotifyCollectionChangedAction.Replace:
+
                         Remove(e.OldStartingIndex, e.OldItems);
                         Add(e.NewStartingIndex, e.NewItems);
+
                         break;
 
                     case NotifyCollectionChangedAction.Remove:
@@ -145,7 +147,13 @@ namespace Avalonia.Collections
             var result = new AvaloniaList<TDerived>();
 
             collection.ForEachItem(
-                (i, item) => result.Insert(i, select(item)),
+                (i, item) =>
+                {
+                    if (i < result.Count)
+                        result.Insert(i, select(item));
+                    else
+                        result.Add(select(item));
+                },
                 (i, item) => result.RemoveAt(i),
                 () => result.Clear());
 
