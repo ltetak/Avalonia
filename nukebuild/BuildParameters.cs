@@ -22,6 +22,9 @@ public partial class Build
     [Parameter("skip-previewer")]
     public bool SkipPreviewer { get; set; }
 
+    [Parameter("nuget-buildtag")]
+    public string NugetBuildTag { get; set; }
+
     public class BuildParameters
     {
         public string Configuration { get; }
@@ -103,6 +106,20 @@ public partial class Build
             IsMyGetRelease = IsReleasable;
             IsNuGetRelease = IsMainRepo && IsReleasable && IsReleaseBranch;
 
+            if (!string.IsNullOrEmpty(b.NugetBuildTag))
+            {
+                var version = GetVersion();
+                string versuffix = "";
+                int si = version.IndexOf('-');
+                if(si > 0)
+                {
+                    versuffix = version.Substring(si);
+                    version = version.Replace(versuffix,"");
+                }
+                //let's force well known version meaning something to us
+                b.ForceNugetVersion = $"{version}{(string.IsNullOrEmpty(b.NugetBuildTag) ? "" : $"{b.NugetBuildTag}")}{versuffix}";
+            }
+           
             // VERSION
             Version = b.ForceNugetVersion ?? GetVersion();
 
