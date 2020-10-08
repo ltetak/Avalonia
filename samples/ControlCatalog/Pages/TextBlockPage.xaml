@@ -29,7 +29,7 @@
         <StackPanel Width="200" Spacing="8">
           <TextBlock
             TextWrapping="Wrap"
-            Text="Multiline TextBlock with TextWrapping.&#xD;&#xD;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna. Cras in mi at felis aliquet congue. Ut a est eget ligula molestie gravida. Curabitur massa. Donec eleifend, libero at sagittis mollis, tellus est malesuada tellus, at luctus turpis elit sit amet quam. Vivamus pretium ornare est." />
+            Text="new line\r\n &#x0d;&#x0a;new line\r &#x0a;new line\n &#x0d;Multiline TextBlock with TextWrapping.&#xD;&#xD;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna. Cras in mi at felis aliquet congue. Ut a est eget ligula molestie gravida. Curabitur massa. Donec eleifend, libero at sagittis mollis, tellus est malesuada tellus, at luctus turpis elit sit amet quam. Vivamus pretium ornare est." />
         </StackPanel>
       </Border>
       <Border>
@@ -55,6 +55,7 @@
       </StackPanel.Styles>
       <Border>
         <StackPanel Width="200" Spacing="8">
+          <TextBlock Text="new line\n\r &#x0a;&#x0d;new line\r\n &#x0d;&#x0a;new line\n &#x0a;new line\r &#x0d;last line"/>
           <TextBlock TextDecorations="Underline" Text="Underline"/>
           <TextBlock TextDecorations="Strikethrough" Text="Strikethrough"/>
           <TextBlock TextDecorations="Overline" Text="Overline" />

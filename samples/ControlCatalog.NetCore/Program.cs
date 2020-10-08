@@ -118,7 +118,13 @@ namespace ControlCatalog.NetCore
                     EnableMultitouch = true,
                     AllowEglInitialization = true
                 })
-                .UseSkia()
+                           .With(new AvaloniaNativePlatformOptions
+                           {
+                               UseDeferredRendering = false,
+                               UseGpu = false
+                           })
+            .UseSkia()
+            //.UseDirect2D1()
                 .UseReactiveUI()
                 .UseManagedSystemDialogs()
                 .LogToDebug();
