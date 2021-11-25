@@ -21,12 +21,12 @@ namespace ControlCatalog.Pages
 
             int textCount = 0;
             SetupDnd("Text", d => d.Set(DataFormats.Text,
-                $"Text was dragged {++textCount} times"));
+                $"Text was dragged {++textCount} times"), DragDropEffects.Copy | DragDropEffects.Move | DragDropEffects.Link);
 
-            SetupDnd("Custom", d => d.Set(CustomFormat, "Test123"));
+            SetupDnd("Custom", d => d.Set(CustomFormat, "Test123"), DragDropEffects.Move);
         }
 
-        void SetupDnd(string suffix, Action<DataObject> factory, DragDropEffects effects = DragDropEffects.Copy)
+        void SetupDnd(string suffix, Action<DataObject> factory, DragDropEffects effects)
         {
             var dragMe = this.Find<Border>("DragMe" + suffix);
             var dragState = this.Find<TextBlock>("DragState"+suffix);
@@ -36,9 +36,13 @@ namespace ControlCatalog.Pages
                 var dragData = new DataObject();
                 factory(dragData);
 
-                var result = await DragDrop.DoDragDrop(e, dragData, DragDropEffects.Copy);
+                //var result = await DragDrop.DoDragDrop(e, dragData, DragDropEffects.Copy | DragDropEffects.Move);
+                var result = await DragDrop.DoDragDrop(e, dragData, effects);
                 switch (result)
                 {
+                    case DragDropEffects.Move:
+                        dragState.Text = "Data was moved";
+                        break;
                     case DragDropEffects.Copy:
                         dragState.Text = "Data was copied";
                         break;
@@ -54,7 +58,11 @@ namespace ControlCatalog.Pages
             void DragOver(object sender, DragEventArgs e)
             {
                 // Only allow Copy or Link as Drop Operations.
-                e.DragEffects = e.DragEffects & (DragDropEffects.Copy | DragDropEffects.Link);
+                //e.DragEffects = e.DragEffects;// & (DragDropEffects.Move);
+                //if (e.DragEffects == DragDropEffects.None)
+                e.DragEffects = DragDropEffects.Link;
+                    
+                //e.DragEffects = e.DragEffects;
 
                 // Only allow if the dragged data contains text or filenames.
                 if (!e.Data.Contains(DataFormats.Text)

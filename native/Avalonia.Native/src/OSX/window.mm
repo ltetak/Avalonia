@@ -1952,17 +1952,14 @@ NSArray* AllLoopModes = [NSArray arrayWithObjects: NSDefaultRunLoopMode, NSEvent
     auto modifiers = [self getModifiers:[[NSApp currentEvent] modifierFlags]];
     NSDragOperation nsop = [info draggingSourceOperationMask];
    
-        auto effects = ConvertDragDropEffects(nsop);
+    auto effects = ConvertDragDropEffects(nsop);
     int reffects = (int)_parent->BaseEvents
     ->DragEvent(type, point, modifiers, effects,
                 CreateClipboard([info draggingPasteboard], nil),
                 GetAvnDataObjectHandleFromDraggingInfo(info));
     
     NSDragOperation ret = 0;
-    
-    // Ensure that the managed part didn't add any new effects
-    reffects = (int)effects & (int)reffects;
-    
+     
     // OSX requires exactly one operation
     if((reffects & (int)AvnDragDropEffects::Copy) != 0)
         ret = NSDragOperationCopy;
