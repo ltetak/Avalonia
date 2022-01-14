@@ -6,6 +6,8 @@
     <IsPackable Condition="'$([MSBuild]::IsOSPlatform(OSX))' == 'True'">true</IsPackable>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageVersion>0.10.11.99-editor</PackageVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(PackAvaloniaNative)' == 'true'">
@@ -19,7 +21,6 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\packages\Avalonia\Avalonia.csproj" />
-    <ProjectReference Include="..\Avalonia.Dialogs\Avalonia.Dialogs.csproj" />
     <AvnComIdl Include="avn.idl" OutputFile="Interop.Generated.cs" />
   </ItemGroup>
   <Import Project="../../build/MicroCom.targets" />

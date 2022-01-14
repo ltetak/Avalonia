@@ -180,7 +180,7 @@ namespace Avalonia.Utilities
                 for(var c=0; c<_count; c++)
                 {
                     var r = _data[c];
-                    if (r?.TryGetTarget(out var sub) == true)
+                    if (r != null && r.TryGetTarget(out var sub) == true)
                         sub.OnEvent(sender, eventArgs);
                     else
                         needCompact = true;
