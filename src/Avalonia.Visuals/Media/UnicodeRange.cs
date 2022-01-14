@@ -12,16 +12,18 @@ namespace Avalonia.Media
         public static UnicodeRange Default = Parse("0-10FFFD");
 
         private readonly UnicodeRangeSegment _single;
-        private readonly IReadOnlyList<UnicodeRangeSegment> _segments = null;
+        private readonly IReadOnlyList<UnicodeRangeSegment> _segments;
 
         public UnicodeRange(int start, int end)
         {
             _single = new UnicodeRangeSegment(start, end);
+            _segments = null;
         }
 
         public UnicodeRange(UnicodeRangeSegment single)
         {
             _single = single;
+            _segments = null;
         }
 
         public UnicodeRange(IReadOnlyList<UnicodeRangeSegment> segments)
@@ -32,6 +34,7 @@ namespace Avalonia.Media
             }
 
             _single = segments[0];
+            _segments = null;
             _segments = segments;
         }
 
