@@ -2133,29 +2133,29 @@ NSArray* AllLoopModes = [NSArray arrayWithObjects: NSDefaultRunLoopMode, NSEvent
 
 -(void) showAppMenuOnly
 {
-    auto appMenuItem = ::GetAppMenuItem();
-    
-    if(appMenuItem != nullptr)
-    {
-        auto appMenu = ::GetAppMenu();
-        
-        auto nativeAppMenu = dynamic_cast<AvnAppMenu*>(appMenu);
-        
-        [[appMenuItem menu] removeItem:appMenuItem];
-        
-        if(_menu != nullptr)
-        {
-            [_menu setHasGlobalMenuItem:false];
-        }
-        
-        [nativeAppMenu->GetNative() addItem:appMenuItem];
-        
-        [NSApp setMenu:nativeAppMenu->GetNative()];
-    }
-    else
-    {
-        [NSApp setMenu:nullptr];
-    }
+//    auto appMenuItem = ::GetAppMenuItem();
+//
+//    if(appMenuItem != nullptr)
+//    {
+//        auto appMenu = ::GetAppMenu();
+//
+//        auto nativeAppMenu = dynamic_cast<AvnAppMenu*>(appMenu);
+//
+//        [[appMenuItem menu] removeItem:appMenuItem];
+//
+//        if(_menu != nullptr)
+//        {
+//            [_menu setHasGlobalMenuItem:false];
+//        }
+//
+//        [nativeAppMenu->GetNative() addItem:appMenuItem];
+//
+//        [NSApp setMenu:nativeAppMenu->GetNative()];
+//    }
+//    else
+//    {
+//        [NSApp setMenu:nullptr];
+//    }
 }
 
 -(void) applyMenu:(AvnMenu *)menu
