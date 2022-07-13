@@ -222,6 +222,13 @@ namespace Avalonia.Controls
                     StopListeningForDefault(inputElement);
                 }
             }
+            if (IsCancel)
+            {
+                if (e.Root is IInputElement inputElement)
+                {
+                    StopListeningForCancel(inputElement);
+                }
+            }
         }
 
         protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
@@ -550,6 +557,7 @@ namespace Avalonia.Controls
             if (e.Key == Key.Enter && IsVisible && IsEnabled)
             {
                 OnClick();
+                e.Handled = true;
             }
         }
 
@@ -563,6 +571,7 @@ namespace Avalonia.Controls
             if (e.Key == Key.Escape && IsVisible && IsEnabled)
             {
                 OnClick();
+                e.Handled = true;
             }
         }
 

@@ -1,7 +1,8 @@
 {
     "sdk": {
         "version": "6.0.100",
-        "version3": "3.1.416"
+        "version3": "3.1.416",
+        "rollForward": "latestFeature"
     },
     "msbuild-sdks": {
         "Microsoft.Build.Traversal": "1.0.43",

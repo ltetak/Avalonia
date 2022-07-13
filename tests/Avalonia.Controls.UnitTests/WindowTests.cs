@@ -696,6 +696,31 @@ namespace Avalonia.Controls.UnitTests
             }
 
             [Fact]
+            public void Width_Height_Should_Not_Be_NaN_After_Show_With_SizeToContent_Manual()
+            {
+                using (UnitTestApplication.Start(TestServices.StyledWindow))
+                {
+                    var child = new Canvas
+                    {
+                        Width = 400,
+                        Height = 800,
+                    };
+
+                    var target = new Window()
+                    {
+                        SizeToContent = SizeToContent.Manual,
+                        Content = child
+                    };
+
+                    Show(target);
+
+                    // Values come from MockWindowingPlatform defaults.
+                    Assert.Equal(800, target.Width);
+                    Assert.Equal(600, target.Height);
+                }
+            }
+
+            [Fact]
             public void Width_Height_Should_Not_Be_NaN_After_Show_With_SizeToContent_WidthAndHeight()
             {
                 using (UnitTestApplication.Start(TestServices.StyledWindow))
@@ -712,10 +737,33 @@ namespace Avalonia.Controls.UnitTests
                         Content = child
                     };
 
+                    target.GetObservable(Window.WidthProperty).Subscribe(x => { });
+
                     Show(target);
 
                     Assert.Equal(400, target.Width);
                     Assert.Equal(800, target.Height);
+                }
+            }
+
+            [Fact]
+            public void MaxWidth_And_MaxHeight_Should_Be_Respected_With_SizeToContent_WidthAndHeight()
+            {
+                using (UnitTestApplication.Start(TestServices.StyledWindow))
+                {
+                    var child = new ChildControl();
+
+                    var target = new Window()
+                    {
+                        SizeToContent = SizeToContent.WidthAndHeight,
+                        MaxWidth = 300,
+                        MaxHeight = 700,
+                        Content = child,
+                    };
+
+                    Show(target);
+
+                    Assert.Equal(new[] { new Size(300, 700) }, child.MeasureSizes);
                 }
             }
 
