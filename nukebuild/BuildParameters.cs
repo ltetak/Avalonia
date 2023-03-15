@@ -20,7 +20,7 @@ public partial class Build
     public string ForceNugetVersion { get; set; }
 
     [Parameter("skip-previewer")]
-    public bool SkipPreviewer { get; set; } = IsLocalBuild;
+    public bool SkipPreviewer { get; set; } = true;//IsLocalBuild;
 
     [Parameter("nuget-buildtag")]
     public string NugetBuildTag { get; set; }
