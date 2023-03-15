@@ -34,7 +34,7 @@ namespace Avalonia.OpenGL.Controls
                 _attachment.Present();
             }
 
-            context.DrawImage(_bitmap, new Rect(_bitmap.Size), Bounds);
+            context.DrawImage(_bitmap, new Rect(_bitmap.Size), new Rect(Bounds.Size));
             base.Render(context);
         }
         
@@ -145,6 +145,13 @@ namespace Avalonia.OpenGL.Controls
             {
                 Logger.TryGet(LogEventLevel.Error, "OpenGL")?.Log("OpenGlControlBase",
                     "Unable to initialize OpenGL: unable to create additional OpenGL context: {exception}", e);
+                return false;
+            }
+
+            if (_context == null)
+            {
+                Logger.TryGet(LogEventLevel.Error, "OpenGL")?.Log("OpenGlControlBase",
+                    "Unable to initialize OpenGL: unable to create additional OpenGL context.");
                 return false;
             }
 
