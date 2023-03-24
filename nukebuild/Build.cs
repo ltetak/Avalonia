@@ -34,6 +34,7 @@ using MicroCom.CodeGenerator;
  */
 using JetBrains.Annotations;
 using Nuke.Common.Tools.DotNet;
+using System.IO.Compression;
 // ReSharper disable ReturnValueOfPureMethodIsNotUsed
 
 partial class Build : NukeBuild
@@ -292,7 +293,7 @@ partial class Build : NukeBuild
             //download avalonia native osx binary, so we don't have to build it on osx
             //expected to be -> Build/Products/Release/libAvalonia.Native.OSX.dylib
             //Avalonia.Native.0.10.0-preview5.nupkg
-            string nugetversion = "0.10.18";
+            string nugetversion = "0.10.19";
 
             var nugetdir = RootDirectory + "/Build/Products/Release/";
             //string nugeturl = "https://www.myget.org/F/avalonia-ci/api/v2/package/Avalonia.Native/";
@@ -323,7 +324,7 @@ partial class Build : NukeBuild
         .After(RunTests)
         .Executes(() =>
         {
-            DotNetPack(c => ApplySetting(c).SetProject(Parameters.MSBuildSolution));
+            DotNetPack(c => ApplySetting(c).SetProject(Parameters.MSBuildSolution).AddProperty("PackAvaloniaNative", "true"));
         });
 
     Target CreateNugetPackages => _ => _
