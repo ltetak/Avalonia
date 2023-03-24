@@ -320,21 +320,22 @@ namespace Avalonia.Markup.Parsers
 
         private static TypeName ParseTypeName(ref CharacterReader r)
         {
-            ReadOnlySpan<char> ns, typeName;
-            ns = ReadOnlySpan<char>.Empty;
+            //msbuild complains about this code: temp fix for vs2022 compile it
+            //ReadOnlySpan<char> ns, typeName;
+            string ns = null, typeName;
             var typeNameOrNamespace = r.ParseIdentifier();
 
             if (!r.End && r.TakeIf(':'))
             {
-                ns = typeNameOrNamespace;
-                typeName = r.ParseIdentifier();
+                ns = typeNameOrNamespace.ToString();
+                typeName = r.ParseIdentifier().ToString();
             }
             else
             {
-                typeName = typeNameOrNamespace;
+                typeName = typeNameOrNamespace.ToString();
             }
 
-            return new TypeName(ns, typeName);
+            return new TypeName((ns??"").AsSpan(), typeName.AsSpan());
         }
 
         private static bool ParseNot(ref CharacterReader r)

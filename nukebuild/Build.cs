@@ -41,6 +41,32 @@ partial class Build : NukeBuild
 {
     [Solution("Avalonia.sln")] readonly Solution Solution;
 
+    static string GetMsBuildExe(string vsVersion = "2022")
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return null;
+
+        var msBuildDirectory = VSWhere("-nologo -property installationPath -format value -prerelease").FirstOrDefault(v => v.Text.Contains(vsVersion)).Text;
+
+        if (!string.IsNullOrWhiteSpace(msBuildDirectory))
+        {
+            string msBuildExe = Path.Combine(msBuildDirectory, @"MSBuild\Current\Bin\MSBuild.exe");
+            if (!System.IO.File.Exists(msBuildExe))
+                msBuildExe = Path.Combine(msBuildDirectory, @"MSBuild\15.0\Bin\MSBuild.exe");
+            return msBuildExe;
+        }
+
+
+
+        return null;
+    }
+
+    static Lazy<string> MsBuildExe = new Lazy<string>(() =>
+    {
+        return GetMsBuildExe();
+    }, false);
+
+
     BuildParameters Parameters { get; set; }
     protected override void OnBuildInitialized()
     {
@@ -75,8 +101,27 @@ partial class Build : NukeBuild
         }
         ExecWait("dotnet version:", "dotnet", "--info");
         ExecWait("dotnet workloads:", "dotnet", "workload list");
+        VSWhere("-nologo -property installationPath -format value -prerelease");
         Information("Processor count: " + Environment.ProcessorCount);
-        Information("Available RAM: " + GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 0x100000 + "MB");
+        Information("Available RAM: " + GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 0x100000 + "MB");     
+    }
+
+    IReadOnlyCollection<Output> MsBuildCommon(
+        string projectFile,
+        Configure<MSBuildSettings> configurator = null)
+    {
+        return MSBuild(c => c
+            .SetProjectFile(projectFile)
+            // This is required for VS2019 image on Azure Pipelines
+            .When(Parameters.IsRunningOnWindows &&
+                  Parameters.IsRunningOnAzure, _ => _
+                .AddProperty("JavaSdkDirectory", GetVariable<string>("JAVA_HOME_8_X64")))
+            .AddProperty("PackageVersion", Parameters.Version)
+            .AddProperty("iOSRoslynPathHackRequired", true)
+            .SetProcessToolPath(MsBuildExe.Value)
+            .SetConfiguration(Parameters.Configuration)
+            .SetVerbosity(MSBuildVerbosity.Minimal)
+            .Apply(configurator));
     }
 
     DotNetConfigHelper ApplySettingCore(DotNetConfigHelper c)
@@ -162,7 +207,15 @@ partial class Build : NukeBuild
         .DependsOn(CompileHtmlPreviewer)
         .Executes(() =>
         {
-            DotNetBuild(c => ApplySetting(c)
+            //Build tasks with ms build 2022, as it's not possible on TC with dotnet build ??
+            if (Parameters.IsRunningOnWindows && !IsDotnetCoreOnlyBuild())
+                MsBuildCommon(Parameters.MSBuildSolution, c => c
+                    .SetProcessArgumentConfigurator(a => a.Add("/r"))
+                    .AddTargets("Build")
+                );
+
+            else
+                DotNetBuild(c => ApplySetting(c)
                 .SetProjectFile(Parameters.MSBuildSolution)
             );
         });

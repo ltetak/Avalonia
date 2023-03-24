@@ -333,8 +333,11 @@ namespace Avalonia.Markup.Parsers
         private static TSyntax ParseType<TSyntax>(ref CharacterReader r, TSyntax syntax)
             where TSyntax : ITypeSyntax
         {
-            ReadOnlySpan<char> ns = default;
-            ReadOnlySpan<char> type;
+            //fix code compile with vs2022
+            //ReadOnlySpan<char> ns = default;
+            //ReadOnlySpan<char> type;
+            string ns = string.Empty;
+            string type;
             var namespaceOrTypeName = r.ParseIdentifier();
 
             if (namespaceOrTypeName.IsEmpty)
@@ -344,16 +347,16 @@ namespace Avalonia.Markup.Parsers
 
             if (!r.End && r.TakeIf('|'))
             {
-                ns = namespaceOrTypeName;
+                ns = namespaceOrTypeName.ToString();
                 if (r.End)
                 {
                     throw new ExpressionParseException(r.Position, $"Unexpected end of selector.");
                 }
-                type = r.ParseIdentifier();
+                type = r.ParseIdentifier().ToString();
             }
             else
             {
-                type = namespaceOrTypeName;
+                type = namespaceOrTypeName.ToString();
             }
 
             syntax.Xmlns = ns.ToString();
