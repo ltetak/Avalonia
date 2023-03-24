@@ -57,14 +57,12 @@ public partial class Build
         public AbsolutePath NugetIntermediateRoot { get; }
         public AbsolutePath NugetRoot { get; }
         public AbsolutePath ZipRoot { get; }
-        public AbsolutePath BinRoot { get; }
         public AbsolutePath TestResultsRoot { get; }
         public string DirSuffix { get; }
         public List<string> BuildDirs { get; }
         public string FileZipSuffix { get; }
         public AbsolutePath ZipCoreArtifacts { get; }
         public AbsolutePath ZipNuGetArtifacts { get; }
-        public AbsolutePath ZipTargetControlCatalogNetCoreDir { get; }
 
 
         public BuildParameters(Build b)
@@ -82,11 +80,11 @@ public partial class Build
             MSBuildSolution = RootDirectory / "dirs.proj";
 
             // PARAMETERS
-            IsLocalBuild = Host == HostType.Console;
+            IsLocalBuild = NukeBuild.IsLocalBuild;
             IsRunningOnUnix = Environment.OSVersion.Platform == PlatformID.Unix ||
                               Environment.OSVersion.Platform == PlatformID.MacOSX;
             IsRunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            IsRunningOnAzure = Host == HostType.AzurePipelines ||
+            IsRunningOnAzure = Host is AzurePipelines ||
                                Environment.GetEnvironmentVariable("LOGNAME") == "vsts";
 
             if (IsRunningOnAzure)
@@ -141,7 +139,6 @@ public partial class Build
             NugetRoot = ArtifactsDir / "nuget";
             NugetIntermediateRoot = RootDirectory / "build-intermediate" / "nuget";
             ZipRoot = ArtifactsDir / "zip";
-            BinRoot = ArtifactsDir / "bin";
             TestResultsRoot = ArtifactsDir / "test-results";
             //skip nuke build folder e.g. only src/tests and samples folders will be cleaned
            // var r = GlobExpressions.Glob.Directories(RootDirectory / "src", "**/bin;**/obj");
@@ -153,7 +150,6 @@ public partial class Build
             FileZipSuffix = Version + ".zip";
             ZipCoreArtifacts = ZipRoot / ("Avalonia-" + FileZipSuffix);
             ZipNuGetArtifacts = ZipRoot / ("Avalonia-NuGet-" + FileZipSuffix);
-            ZipTargetControlCatalogNetCoreDir = ZipRoot / ("ControlCatalog.NetCore-" + FileZipSuffix);
         }
 
         string GetVersion()

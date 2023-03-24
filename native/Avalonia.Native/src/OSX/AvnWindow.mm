@@ -43,7 +43,7 @@
 
 -(bool) isDialog
 {
-    return _parent->IsDialog();
+    return _parent->IsModal();
 }
 
 -(double) getExtendedTitleBarHeight
@@ -170,9 +170,7 @@
     _closed = false;
     _isEnabled = true;
 
-    [self backingScaleFactor];
     [self setOpaque:NO];
-    [self setBackgroundColor: [NSColor clearColor]];
 
     _isExtended = false;
     _isTransitioningToFullScreen = false;
@@ -224,9 +222,22 @@
     }
 }
 
+// From chromium:
+//
+// > The delegate or the window class should implement this method so that
+// > -[NSWindow isZoomed] can be then determined by whether or not the current
+// > window frame is equal to the zoomed frame.
+//
+// If we don't implement this, then isZoomed always returns true for a non-
+// resizable window ¯\_(ツ)_/¯
+- (NSRect)windowWillUseStandardFrame:(NSWindow*)window
+                        defaultFrame:(NSRect)newFrame {
+  return newFrame;
+}
+
 -(BOOL)canBecomeKeyWindow
 {
-    if(_canBecomeKeyWindow)
+    if(_canBecomeKeyWindow && !_closed)
     {
         // If the window has a child window being shown as a dialog then don't allow it to become the key window.
         auto parent = dynamic_cast<WindowImpl*>(_parent.getRaw());
@@ -262,10 +273,6 @@
 -(void) setEnabled:(bool)enable
 {
     _isEnabled = enable;
-    
-    [[self standardWindowButton:NSWindowCloseButton] setEnabled:enable];
-    [[self standardWindowButton:NSWindowMiniaturizeButton] setEnabled:enable];
-    [[self standardWindowButton:NSWindowZoomButton] setEnabled:enable];
 }
 
 -(void)becomeKeyWindow
@@ -282,11 +289,16 @@
 
 - (void)windowDidBecomeKey:(NSNotification *_Nonnull)notification
 {
+    if (_parent == nullptr)
+        return;
+    
     _parent->BringToFront();
     
     dispatch_async(dispatch_get_main_queue(), ^{
         @try {
-        [self invalidateShadow];
+            [self invalidateShadow];
+            if (self->_parent != nullptr)
+                self->_parent->BringToFront();
         }
         @finally{
         }
@@ -381,10 +393,10 @@
 
 - (BOOL)windowShouldZoom:(NSWindow *_Nonnull)window toFrame:(NSRect)newFrame
 {
-    return true;
+    return _parent->CanZoom();
 }
 
--(void)resignKeyWindow
+-(void)windowDidResignKey:(NSNotification *)notification
 {
     if(_parent)
         _parent->BaseEvents->Deactivated();
@@ -392,8 +404,6 @@
     [self showAppMenuOnly];
     
     [self invalidateShadow];
-
-    [super resignKeyWindow];
 }
 
 - (void)windowDidMove:(NSNotification *_Nonnull)notification

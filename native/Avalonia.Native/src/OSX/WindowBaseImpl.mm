@@ -34,18 +34,14 @@ WindowBaseImpl::WindowBaseImpl(IAvnWindowBaseEvents *events, IAvnGlContext *gl, 
     lastSize = NSSize { 100, 100 };
     lastMaxSize = NSSize { CGFLOAT_MAX, CGFLOAT_MAX};
     lastMinSize = NSSize { 0, 0 };
-
     lastMenu = nullptr;
     
     CreateNSWindow(usePanel);
     
     [Window setContentView:StandardContainer];
-    [Window setStyleMask:NSWindowStyleMaskBorderless];
     [Window setBackingType:NSBackingStoreBuffered];
-
     [Window setContentMinSize:lastMinSize];
     [Window setContentMaxSize:lastMaxSize];
-
     [Window setOpaque:false];
 }
 
@@ -488,10 +484,11 @@ HRESULT WindowBaseImpl::CreateNativeControlHost(IAvnNativeControlHost **retOut) 
     return S_OK;
 }
 
-HRESULT WindowBaseImpl::SetBlurEnabled(bool enable) {
+HRESULT WindowBaseImpl::SetTransparencyMode(AvnWindowTransparencyMode mode) {
     START_COM_CALL;
 
-    [StandardContainer ShowBlur:enable];
+    [Window setBackgroundColor: (mode != Transparent ? [NSColor windowBackgroundColor] : [NSColor clearColor])];
+    [StandardContainer ShowBlur: mode == Blur];
 
     return S_OK;
 }
@@ -540,16 +537,12 @@ HRESULT WindowBaseImpl::BeginDragAndDropOperation(AvnDragDropEffects effects, Av
     return S_OK;
 }
 
-bool WindowBaseImpl::IsDialog() {
+bool WindowBaseImpl::IsModal() {
     return false;
 }
 
-NSWindowStyleMask WindowBaseImpl::GetStyle() {
-    return NSWindowStyleMaskBorderless;
-}
-
 void WindowBaseImpl::UpdateStyle() {
-    [Window setStyleMask:GetStyle()];
+    [Window setStyleMask:CalculateStyleMask()];
 }
 
 void WindowBaseImpl::CleanNSWindow() {
@@ -560,21 +553,12 @@ void WindowBaseImpl::CleanNSWindow() {
     }
 }
 
-void WindowBaseImpl::CreateNSWindow(bool isDialog) {
-    if (isDialog) {
-        if (![Window isKindOfClass:[AvnPanel class]]) {
-            CleanNSWindow();
-
-            Window = [[AvnPanel alloc] initWithParent:this contentRect:NSRect{0, 0, lastSize} styleMask:GetStyle()];
-            
-            [Window setHidesOnDeactivate:false];
-        }
+void WindowBaseImpl::CreateNSWindow(bool usePanel) {
+    if (usePanel) {
+        Window = [[AvnPanel alloc] initWithParent:this contentRect:NSRect{0, 0, lastSize} styleMask:NSWindowStyleMaskBorderless];
+        [Window setHidesOnDeactivate:false];
     } else {
-        if (![Window isKindOfClass:[AvnWindow class]]) {
-            CleanNSWindow();
-
-            Window = [[AvnWindow alloc] initWithParent:this contentRect:NSRect{0, 0, lastSize} styleMask:GetStyle()];
-        }
+        Window = [[AvnWindow alloc] initWithParent:this contentRect:NSRect{0, 0, lastSize} styleMask:NSWindowStyleMaskBorderless];
     }
 }
 

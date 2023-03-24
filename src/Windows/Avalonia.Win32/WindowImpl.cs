@@ -245,6 +245,11 @@ namespace Avalonia.Win32
         {
             get
             {
+                if (!IsWindowVisible(_hwnd))
+                {
+                    return _showWindowState;
+                }
+
                 if (_isFullScreenActive)
                 {
                     return WindowState.FullScreen;
@@ -511,6 +516,9 @@ namespace Avalonia.Win32
 
         public void Resize(Size value, PlatformResizeReason reason)
         {
+            if (WindowState != WindowState.Normal)
+                return;
+
             int requestedClientWidth = (int)(value.Width * RenderScaling);
             int requestedClientHeight = (int)(value.Height * RenderScaling);
 
@@ -856,11 +864,10 @@ namespace Avalonia.Win32
 
                 var window_rect = monitor_info.rcMonitor.ToPixelRect();
 
+                _isFullScreenActive = true;
                 SetWindowPos(_hwnd, IntPtr.Zero, window_rect.X, window_rect.Y,
                              window_rect.Width, window_rect.Height,
                              SetWindowPosFlags.SWP_NOZORDER | SetWindowPosFlags.SWP_NOACTIVATE | SetWindowPosFlags.SWP_FRAMECHANGED);
-
-                _isFullScreenActive = true;
             }
             else
             {
@@ -1082,8 +1089,21 @@ namespace Avalonia.Win32
                     var y = monitorInfo.rcWork.top;
                     var cx = Math.Abs(monitorInfo.rcWork.right - x);
                     var cy = Math.Abs(monitorInfo.rcWork.bottom - y);
+                    var style = (WindowStyles)GetWindowLong(_hwnd, (int)WindowLongParam.GWL_STYLE);
 
-                    SetWindowPos(_hwnd, WindowPosZOrder.HWND_NOTOPMOST, x, y, cx, cy, SetWindowPosFlags.SWP_SHOWWINDOW);
+                    if (!style.HasFlag(WindowStyles.WS_SIZEFRAME))
+                    {
+                        // When calling SetWindowPos on a maximized window it automatically adjusts
+                        // for "hidden" borders which are placed offscreen, EVEN IF THE WINDOW HAS
+                        // NO BORDERS, meaning that the window is placed wrong when we have CanResize
+                        // == false. Account for this here.
+                        var borderThickness = BorderThickness;
+                        x -= (int)borderThickness.Left;
+                        cx += (int)borderThickness.Left + (int)borderThickness.Right;
+                        cy += (int)borderThickness.Bottom;
+                    }
+
+                    SetWindowPos(_hwnd, WindowPosZOrder.HWND_NOTOPMOST, x, y, cx, cy, SetWindowPosFlags.SWP_SHOWWINDOW | SetWindowPosFlags.SWP_FRAMECHANGED);
                 }
             }
         }
