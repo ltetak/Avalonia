@@ -109,6 +109,9 @@ partial class Build : NukeBuild
         string projectFile,
         Configure<MSBuildSettings> configurator = null)
     {
+        //tmp: on TC if we are missing specific dotnetversion try workaround it
+        string dotnetDir = $"{Solution.Directory}\\.nuke\\temp\\dotnet-win";
+                                        
         return MSBuild(c => c
             .SetProjectFile(projectFile)
             // This is required for VS2019 image on Azure Pipelines
@@ -120,6 +123,7 @@ partial class Build : NukeBuild
             .SetProcessToolPath(MsBuildExe.Value)
             .SetConfiguration(Parameters.Configuration)
             .SetVerbosity(MSBuildVerbosity.Minimal)
+            .SetProcessEnvironmentVariable("PATH", $"{dotnetDir};{Environment.GetEnvironmentVariable("PATH")}")
             .Apply(configurator));
     }
 
@@ -210,10 +214,9 @@ partial class Build : NukeBuild
             //Build tasks with ms build 2022, as it's not possible on TC with dotnet build ??
             if (Parameters.IsRunningOnWindows && !IsDotnetCoreOnlyBuild())
                 MsBuildCommon(Parameters.MSBuildSolution, c => c
-                    .SetProcessArgumentConfigurator(a => a.Add("/r"))
-                    .AddTargets("Build")
-                );
-
+                        .SetProcessArgumentConfigurator(a => a.Add("/r"))                        
+                        .AddTargets("Build")
+                    );
             else
                 DotNetBuild(c => ApplySetting(c)
                 .SetProjectFile(Parameters.MSBuildSolution)
@@ -377,6 +380,11 @@ partial class Build : NukeBuild
         .After(RunTests)
         .Executes(() =>
         {
+            if (Parameters.IsRunningOnWindows && !IsDotnetCoreOnlyBuild())
+                MsBuildCommon(Parameters.MSBuildSolution, c => c
+                    .AddProperty("PackAvaloniaNative", "true")
+                    .AddTargets("Pack"));
+            else
             DotNetPack(c => ApplySetting(c).SetProject(Parameters.MSBuildSolution).AddProperty("PackAvaloniaNative", "true"));
         });
 
