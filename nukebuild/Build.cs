@@ -56,9 +56,8 @@ partial class Build : NukeBuild
             return msBuildExe;
         }
 
-
-
-        return null;
+        //by default return 2022 version as it's required
+        return @"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe";
     }
 
     static Lazy<string> MsBuildExe = new Lazy<string>(() =>
@@ -197,8 +196,9 @@ partial class Build : NukeBuild
     bool IsDotnetCoreOnlyBuild()
     {
         //avalonia can't build with msbuild from vs 2019 so we need vs 2022
+        //on TC vs is not found by vswhere ???
         var r = int.Parse(VSWhere("-latest -nologo -property catalog_productLineVersion").First().Text);
-        return ForceDotNetCoreBuild || (r <= 2019);
+        return ForceDotNetCoreBuild;// || (r <= 2019);
     }
 
     Target Compile => _ => _
